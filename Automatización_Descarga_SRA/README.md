@@ -1,41 +1,41 @@
-# Pipeline Automatizado de Descarga de Datos SRA y Análisis Preliminar
+# Automated SRA Data Ingestion and Preliminary Analysis Pipeline
 
-## Objetivo del Script
+## Script Objective
 
-Este script en R automatiza un flujo de trabajo bioinformático completo, desde la obtención de datos crudos de secuenciación desde la base de datos pública SRA (Sequence Read Archive) de NCBI hasta un análisis de expresión diferencial preliminar. El objetivo es proporcionar un método reproducible y escalable para descargar y procesar datos de RNA-Seq asociados a un proyecto de investigación específico.
+This R script automates an end-to-end bioinformatics workflow, from retrieving raw sequencing data from the public NCBI Sequence Read Archive (SRA) database to preliminary differential expression analysis. The objective is to provide a reproducible and scalable pipeline for downloading and processing RNA-Seq data associated with a specific research project.
 
-**Nota:** Este repositorio contiene únicamente el código fuente. Por motivos de confidencialidad, el BioProject ID y los datos generados no se publican.
+**Note:** This repository contains source code only. For confidentiality reasons, the BioProject ID and generated data are not published.
 
-## Metodología Implementada
+## Implemented Methodology
 
-El pipeline está diseñado como un flujo de trabajo secuencial que combina la interacción con APIs, la automatización de la línea de comandos y el análisis estadístico en R.
+The pipeline is designed as a sequential workflow combining API interaction, command-line automation, and statistical analysis in R.
 
-### 1. Descubrimiento y Descarga de Datos
+### 1. Data Discovery and Download
 
-Esta fase automatiza la obtención de los datos crudos.
-* **Interacción con la API de NCBI:** Utiliza el paquete `rentrez` para conectarse a la base de datos SRA y recuperar todos los identificadores de experimentos (`SRR IDs`) asociados a un `BioProject` de interés.
-* **Automatización de la Línea de Comandos:** El script genera y ejecuta sistemáticamente comandos de `fasterq-dump` (una herramienta del SRA-Toolkit) para cada `SRR ID`, descargando de forma eficiente los archivos FASTQ crudos. Esto demuestra la capacidad de integrar R con herramientas bioinformáticas externas estándar.
+This phase automates raw data retrieval:
+* **NCBI API Interaction:** Uses the `rentrez` package to query the SRA database and retrieve all experiment identifiers (`SRR IDs`) associated with a `BioProject` of interest.
+* **Command-Line Automation:** The script systematically generates and executes `fasterq-dump` commands (from the SRA-Toolkit) for each `SRR ID`, efficiently downloading raw FASTQ files. This demonstrates seamless integration of R with standard external bioinformatics tools.
 
-### 2. Procesamiento de Datos de Cuantificación
+### 2. Quantification Data Processing
 
-El script está diseñado para continuar el análisis una vez que los datos FASTQ han sido procesados por una herramienta de cuantificación de expresión como **Salmon**.
-* **Importación de Resultados:** Utiliza el paquete `tximport`, el método estándar y recomendado para cargar los resultados de cuantificación de Salmon (`quant.sf`) en R, agregando los conteos a nivel de gen.
+The script is designed to resume downstream analysis once FASTQ files have been processed by an expression quantification tool such as **Salmon**:
+* **Importing Results:** Uses the `tximport` package—the standard and recommended workflow to ingest Salmon quantification results (`quant.sf`) into R—aggregating transcript abundance to gene-level counts.
 
-### 3. Análisis de Expresión Diferencial
+### 3. Differential Expression Analysis
 
-Con los datos de conteos ya en R, se realiza un análisis estadístico para identificar genes que cambian su expresión entre condiciones.
-* **Configuración del Experimento:** Se crea un objeto `DESeqDataSet` a partir de la matriz de conteos, definiendo un diseño experimental multifactorial (ej. `~ genotipo + tiempo`).
-* **Análisis con DESeq2:** Se ejecuta el pipeline de `DESeq2` para normalizar los datos y ajustar el modelo estadístico.
-* **Extracción de Resultados:** Se extraen los resultados para contrastes específicos de interés (ej. `MUT vs WT` o `post vs pre-tratamiento`).
-* **Visualización de Resultados:** Se generan visualizaciones clave para la interpretación de los resultados, incluyendo:
-    * **MA plots** para visualizar la relación entre el cambio de expresión y la expresión promedio.
-    * **Heatmaps** con `pheatmap` de los genes más significativos para observar patrones de expresión a través de las muestras.
+With count data loaded into R, statistical analysis is performed to identify differentially expressed genes across experimental conditions:
+* **Experimental Setup:** Constructs a `DESeqDataSet` object from the count matrix, defining a multifactorial experimental design (e.g., `~ genotype + time`).
+* **DESeq2 Analysis:** Executes the `DESeq2` pipeline to normalize data and fit the statistical model.
+* **Results Extraction:** Extracts results for specific contrasts of interest (e.g., `MUT vs WT` or `post vs pre-treatment`).
+* **Results Visualization:** Generates key visualizations for biological interpretation, including:
+  * **MA plots** to visualize the relationship between log2 fold change and mean expression.
+  * **Heatmaps** with `pheatmap` for top significant genes to inspect expression patterns across samples.
 
-## Habilidades y Tecnologías Demostradas
-* **Lenguaje:** R
-* **Automatización y Scripting:** Creación de un flujo de trabajo reproducible.
-* **Interacción con APIs:** `rentrez` para consultar bases de datos de NCBI.
-* **Integración con Línea de Comandos:** Llamadas al sistema para ejecutar herramientas externas (SRA-Toolkit).
-* **Conocimiento de Pipelines de NGS:** Comprensión del flujo: SRA -> FASTQ -> Cuantificación (Salmon) -> Análisis.
-* **Análisis de RNA-Seq:** `tximport`, `DESeq2`.
-* **Visualización:** `pheatmap`.
+## Skills & Technologies Demonstrated
+* **Language:** R
+* **Automation & Scripting:** Creation of a reproducible workflow.
+* **API Interaction:** `rentrez` to query NCBI databases.
+* **Command-Line Integration:** System calls to execute external CLI tools (SRA-Toolkit).
+* **NGS Pipeline Knowledge:** End-to-end understanding of the workflow: SRA -> FASTQ -> Quantification (Salmon) -> Analysis.
+* **RNA-Seq Analysis:** `tximport`, `DESeq2`.
+* **Visualization:** `pheatmap`.
