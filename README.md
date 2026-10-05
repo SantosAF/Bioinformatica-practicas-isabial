@@ -2,6 +2,7 @@
 This repository contains the scripts I developed during my internship as a bioinformatics student at the Health and Biomedical Research Institute of Alicante (ISABIAL).
 
 **Note:** For confidentiality and intellectual property reasons, this repository contains source code only. No project data, results, or sensitive information are included.
+**Note on Language:** This repository was originally developed and documented in Spanish during my internship at ISABIAL, and has been translated into English for international standardization and reproducibility.
 
 ## Projects
 
