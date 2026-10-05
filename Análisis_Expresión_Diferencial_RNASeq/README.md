@@ -1,47 +1,47 @@
-# Pipeline Avanzado y Multifásico para Análisis de RNA-Seq
+# Advanced Multi-Stage RNA-Seq Analysis Pipeline
 
-## Objetivo del Script
+## Script Objective
 
-Este script documenta una investigación bioinformática profunda y multifacética de datos de RNA-Seq. Va más allá de un simple análisis de expresión diferencial para realizar comparaciones entre subgrupos clínicos, validar la robustez de los resultados mediante diferentes métodos de normalización, corregir activamente los efectos técnicos (*batch effects*) y refinar las hipótesis biológicas mediante análisis iterativos de enriquecimiento funcional.
+This script documents an in-depth, multifaceted bioinformatics investigation of RNA-Seq data. It extends beyond standard differential expression testing to perform clinical subgroup comparisons, evaluate result robustness across multiple normalization strategies, systematically correct technical batch effects, and iteratively refine biological hypotheses through functional enrichment workflows.
 
-**Nota:** Este repositorio contiene únicamente el código fuente. Por motivos de confidencialidad, los datos de entrada y los resultados generados no se publican.
+**Note:** This repository contains source code only. Due to confidentiality agreements, raw input datasets and generated results are not published.
 
-## Metodología Implementada
+## Implemented Methodology
 
-El script está estructurado en cuatro análisis principales, cada uno construido sobre el anterior:
+The pipeline is structured into four main analytical stages, each building upon the previous:
 
-### 1. Análisis Primario: Pacientes con Respuesta (R) vs. Sin Respuesta (NR)
+### 1. Primary Analysis: Responders (R) vs. Non-Responders (NR)
 
-El primer paso establece la base del análisis comparando los dos grupos principales.
-* **Expresión Diferencial:** Identificación de genes diferencialmente expresados usando `DESeq2`.
-* **Análisis Exploratorio:** Generación de gráficos PCA para visualizar la separación de grupos, comparando los resultados con datos crudos (log-transformados) y con datos normalizados por DESeq2.
-* **Análisis de Enriquecimiento Funcional (GSEA):** Se utiliza `fgsea` con listas de genes personalizadas provenientes de diferentes fuentes (RNA-seq, scRNA-seq, GO). Se implementa una estrategia de filtrado para listas de genes muy grandes para obtener resultados significativos.
-* **Análisis de Sobre-Representación (ORA):** Se realizan análisis de enriquecimiento para Gene Ontology (GO: BP, MF, CC) y rutas KEGG utilizando `clusterProfiler` sobre los genes significativos.
+The initial phase establishes baseline findings by comparing the two primary study cohorts:
+* **Differential Expression:** Identification of differentially expressed genes using `DESeq2`.
+* **Exploratory Data Analysis:** Generation of PCA plots to assess group separation, comparing raw (log-transformed) counts against DESeq2 variance-stabilized normalized data.
+* **Gene Set Enrichment Analysis (GSEA):** Functional enrichment via `fgsea` using custom gene lists from diverse sources (bulk RNA-seq, scRNA-seq, and Gene Ontology). Implements a size-filtering strategy on broad gene sets to ensure biological specificity.
+* **Over-Representation Analysis (ORA):** Enrichment testing across Gene Ontology domains (GO: BP, MF, CC) and KEGG pathways using `clusterProfiler` on significant genes.
 
-### 2. Análisis de Subgrupos Clínicos
+### 2. Clinical Subgroup Analysis
 
-Se profundiza en la heterogeneidad de los datos, analizando subgrupos más específicos dentro de las categorías R y NR.
-* **Comparaciones Múltiples:** Se realizan análisis de expresión diferencial entre subgrupos más finos, como Respuesta Completa (R_CR) vs. Respuesta Parcial (R_PR), o Pacientes con Enfermedad Estable (NR_SD) vs. Progresión de la Enfermedad (NR_PD).
-* **Visualización Específica:** Se generan Volcano Plots para cada una de estas comparaciones detalladas.
+Investigates cohort heterogeneity by evaluating granular subsets within Responder and Non-Responder classifications:
+* **Multiple Pairwise Comparisons:** Differential expression testing across specific response tiers, such as Complete Response (R_CR) vs. Partial Response (R_PR), and Stable Disease (NR_SD) vs. Progressive Disease (NR_PD).
+* **Targeted Visualization:** Volcano plots generated for each detailed subgroup comparison.
 
-### 3. Análisis de Responder (CR vs. PR) con Validación Técnica
+### 3. Responder Sub-Analysis (CR vs. PR) with Technical Validation
 
-Esta fase se centra en la comparación más sutil entre tipos de respuesta, añadiendo capas de validación técnica para asegurar la fiabilidad de los hallazgos.
-* **Corrección Comparativa de Batch Effects:** Se implementan y evalúan dos métodos distintos (`limma::removeBatchEffect` y `sva::ComBat`) para corregir la variabilidad técnica. El impacto de cada corrección se visualiza mediante PCA.
-* **Evaluación de Métodos de Normalización:** Además de la normalización de DESeq2, se calculan los valores **CPM** (con `edgeR`) y **TPM** (requiriendo longitudes de genes de `biomaRt`). Se generan PCAs para cada método, evaluando la robustez de la estructura de los datos.
-* **Análisis Funcional Enfocado:** Se repite el análisis de enriquecimiento GO y KEGG específicamente para los genes diferencialmente expresados entre pacientes con Respuesta Completa y Parcial.
+Focuses on fine-grained transcriptional variation between response categories, adding technical validation layers to ensure analytical reliability:
+* **Comparative Batch Effect Correction:** Implementation and evaluation of two distinct methods (`limma::removeBatchEffect` and `sva::ComBat`) to mitigate technical confounders, assessing correction impact via PCA.
+* **Normalization Strategy Evaluation:** In addition to DESeq2 normalization, computes **CPM** (via `edgeR`) and **TPM** (retrieving gene lengths using `biomaRt`). PCA plots are generated for each method to evaluate data structure stability.
+* **Targeted Functional Profiling:** Dedicated GO and KEGG enrichment analyses focused specifically on genes differentially expressed between Complete and Partial Responders.
 
-### 4. Refinamiento de Hipótesis con "Top X Genes"
+### 4. Hypothesis Refinement via "Top X Genes"
 
-Finalmente, se realiza un análisis de sensibilidad para probar la robustez de las firmas génicas.
-* **GSEA con Subconjuntos:** Se repite el análisis GSEA del paso 1, pero utilizando únicamente un subconjunto de los "Top X" genes más significativos de una lista externa (ordenados por su Log-Fold Change), demostrando un enfoque iterativo para validar las rutas biológicas más relevantes.
+Performs sensitivity analyses to assess the stability and biological relevance of candidate gene signatures:
+* **Subset-Driven GSEA:** Re-runs the GSEA workflow using filtered subsets of "Top X" prioritized genes from external candidate signatures (ranked by Log2 Fold Change), demonstrating an iterative approach to validate high-confidence biological pathways.
 
-## Habilidades y Tecnologías Demostradas
-* **Lenguaje:** R y Tidyverse.
-* **Análisis de Expresión Diferencial:** `DESeq2`.
-* **Análisis Funcional:** `clusterProfiler` (para ORA de GO/KEGG), `fgsea` (para GSEA).
-* **Validación y Normalización de Datos NGS:**
-    * Corrección de Batch Effects: `limma`, `sva`.
-    * Cálculo de Normalizaciones: `edgeR` (para CPM), `biomaRt` (para obtener longitudes de genes para TPM).
-* **Anotación de Genes:** `org.Hs.eg.db`, `AnnotationDbi`.
-* **Visualización Avanzada:** `ggplot2`, `pheatmap`, `EnhancedVolcano`.
+## Skills & Technologies Demonstrated
+* **Language:** R & Tidyverse.
+* **Differential Expression Analysis:** `DESeq2`.
+* **Functional Analysis:** `clusterProfiler` (GO/KEGG ORA), `fgsea` (GSEA).
+* **NGS Normalization & Validation:**
+  * Batch Effect Correction: `limma`, `sva`.
+  * Normalization Computation: `edgeR` (for CPM), `biomaRt` (gene length retrieval for TPM).
+* **Gene Annotation:** `org.Hs.eg.db`, `AnnotationDbi`.
+* **Advanced Scientific Visualization:** `ggplot2`, `pheatmap`, `EnhancedVolcano`.
